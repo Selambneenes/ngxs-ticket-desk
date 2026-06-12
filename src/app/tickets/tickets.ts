@@ -1,5 +1,6 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { TicketItem } from './ticket-item/ticket-item';
+import { ToastrService } from 'ngx-toastr';
 
 export type Ticket = {
   id: number;
@@ -15,6 +16,8 @@ export type Ticket = {
   styleUrl: './tickets.css',
 })
 export class Tickets {
+  private toastr = inject(ToastrService);
+
   private readonly tickets = signal<Ticket[]>([
     {
       id: 1,
@@ -39,9 +42,47 @@ export class Tickets {
 
   
 
+  generateNewId(): number {
+    const currentTickets = this.tickets();
+    return currentTickets.length > 0 ? Math.max(...currentTickets.map(t => t.id)) + 1 : 1;
+  }
   
   allTickets() {
     console.log('Fetching all tickets', this.tickets());
     return this.tickets();
+  }
+
+  removeTicket(id: number) {
+    console.log(`Removing ticket with id: ${id}`);
+    this.tickets.update(currentTickets => currentTickets.filter(ticket => ticket.id !== id));
+    this.toastr.info(`Ticket removed successfully`);
+  }
+
+  addTicket(title: string, description: string) {
+    if (!title.trim() || !description.trim()) {
+      this.toastr.error('Title and description cannot be empty');
+      return;
+    }
+    const newTicket: Ticket = {
+      id: this.generateNewId(),
+      title: title,
+      description: description,
+      status: 'Open',
+    };
+    this.tickets.update(currentTickets => [...currentTickets, newTicket]);
+    this.toastr.success(`Ticket added successfully`);
+
+  }
+
+  updateStatus(id: number, newStatus: Ticket['status']) {
+    this.tickets.update(currentTickets => currentTickets.map(ticket => {
+      if (ticket.id === id) {
+        return {...ticket, status: newStatus}
+      }
+
+      return ticket;
+    }))
+
+    this.toastr.success(`Ticket status updated to ${newStatus}`);
   }
 }

@@ -1,13 +1,19 @@
-<div>
-      <input type="text" placeholder="Enter the ticket" class="w-72 p-2 border border-gray-300 rounded mb-4">
-      <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Ticket</button>
-    </div>
+<div class="flex flex-col items-center mb-6">
+  <div class="flex flex-row gap-x-3 items-center mb-1">
+    <input type="text" #ticketTitle placeholder="Enter the ticket title" class="w-72 p-2 border border-gray-300 rounded mb-4">
+    <input type="text" #ticketDescription placeholder="Enter the ticket description" class="w-72 p-2 border border-gray-300 rounded mb-4">
+  </div>
+  <button (click)="addTicket(ticketTitle.value, ticketDescription.value); ticketTitle.value = ''; ticketDescription.value = '';" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Ticket</button>
+</div>
 
-    <div>
-      <h2 class="text-xl font-semibold mb-4 text-gray-700">Ticket List</h2>
-      <div class="grid gap-4 w-full max-w-md mx-auto text-left">
-        @for (ticket of allTickets(); track ticket.id) {
-          <app-ticket-item [ticket]="ticket"></app-ticket-item>
-        }
-      </div>
-    </div>
+<div>
+  <h2 class="text-xl font-semibold mb-4 text-gray-700">Ticket List</h2>
+  <div class="grid gap-4 w-full max-w-md mx-auto text-left max-h-96 overflow-y-auto">
+    @for (ticket of allTickets(); track ticket.id) {
+      <app-ticket-item [ticket]="ticket" (removeTicket)="removeTicket($event)" (updateStatus)="updateStatus($event.id, $event.newStatus)"></app-ticket-item>
+    } @empty {
+        <p class="text-gray-500 text-center">No tickets available. Please add a ticket.</p>
+    }
+
+  </div>
+</div>
