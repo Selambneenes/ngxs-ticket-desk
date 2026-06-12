@@ -5,7 +5,7 @@ import { Tickets } from "./tickets/tickets";
 
 @Component({
   selector: 'app-root',
-  imports: [Header],
+  imports: [Header, Tickets],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
