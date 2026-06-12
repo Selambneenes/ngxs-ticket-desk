@@ -1,14 +1,19 @@
 <!-- Ticket Card -->
 <div class="group bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-200 transition-all cursor-pointer relative">
     <div class="flex justify-between items-start mb-2">
-      <span class="text-xs font-mono text-gray-400">#001</span>
-      <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-50 text-blue-600">Open</span>
+      <span class="text-xs font-mono text-gray-400">#{{ ticket.id.toString().padStart(3, '0') }}</span>
+      <select #statusSelect (change)="onStatusChange($event)" class="w-auto px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-50 text-blue-600">
+        <option value="Open" [selected]="ticket.status === 'Open'">Open</option>
+        <option value="In Progress" [selected]="ticket.status === 'In Progress'">In Progress</option>
+        <option value="Closed" [selected]="ticket.status === 'Closed'">Closed</option>
+      </select>
     </div>
-    <h3 class="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">Issue with login</h3>
-    <p class="text-sm text-gray-500 mt-1">Users are experiencing issues while trying to log in.</p>
+    <h3 class="font-semibold text-gray-800 group-hover:text-blue-600 transition-colors">{{ ticket.title }}</h3>
+    <p class="text-sm text-gray-500 mt-1">{{ ticket.description }}</p>
 
     <!-- Delete Button -->
     <button 
+      (click)="removeTicket.emit(ticket.id); $event.stopPropagation()"
       class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all cursor-pointer"
       title="Sil"
     >
