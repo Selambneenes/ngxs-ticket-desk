@@ -1,0 +1,13 @@
+<div>
+      <input type="text" placeholder="Enter the ticket" class="w-72 p-2 border border-gray-300 rounded mb-4">
+      <button class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Ticket</button>
+    </div>
+
+    <div>
+      <h2 class="text-xl font-semibold mb-4 text-gray-700">Ticket List</h2>
+      <div class="grid gap-4 w-full max-w-md mx-auto text-left">
+        @for (ticket of allTickets(); track ticket.id) {
+          <app-ticket-item [ticket]="ticket"></app-ticket-item>
+        }
+      </div>
+    </div>
