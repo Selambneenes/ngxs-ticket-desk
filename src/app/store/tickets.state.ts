@@ -1,7 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { State, Action, Selector, StateContext } from '@ngxs/store';
-import { AddTicketAction, RemoveTicketAction, UpdateTicketFilterAction, UpdateTicketStatusAction } from './tickets.actions';
-
+import { GetTicketsAction, AddTicketAction, RemoveTicketAction, UpdateTicketFilterAction, UpdateTicketStatusAction } from './tickets.actions';
+import { TicketService } from '../services/ticket.service';
+import { tap } from 'rxjs/operators';
 
 export type TicketItem = {
   id: number;
@@ -18,31 +19,14 @@ export interface TicketsStateModel {
 @State<TicketsStateModel>({
   name: 'Tickets',
   defaults: {
-    items: [
-    {
-      id: 1,
-      title: 'Issue with login',
-      description: 'Unable to login with correct credentials.',
-      status: 'Open',
-    },
-    {
-      id: 2,
-      title: 'Page not loading',
-      description: 'The dashboard page is not loading properly.',
-      status: 'In Progress',
-    },
-    {
-      id: 3,
-      title: 'Error in payment processing',
-      description: 'Payment fails with an error message.',
-      status: 'Closed',
-    },
-  ],
-  filter: 'All',
+    items: [],
+    filter: 'All',
   },
 })
 @Injectable()
 export class TicketsState {
+  private ticketService = inject(TicketService);
+
   @Selector()
   static getState(state: TicketsStateModel) {
     return state;
@@ -55,8 +39,8 @@ export class TicketsState {
 
   @Selector()
   static getFilteredItems(state: TicketsStateModel) {
-    const {items, filter} = state;
-    
+    const { items, filter } = state;
+
     if (filter === 'All') {
       return items;
     }
@@ -64,22 +48,45 @@ export class TicketsState {
     return items.filter(item => item.status === filter);
   }
 
+  @Action(GetTicketsAction)
+  get(ctx: StateContext<TicketsStateModel>) {
+    return this.ticketService.getTickets().pipe(
+      tap((items) => {
+        ctx.patchState({ items });
+      })
+    );
+  }
+
   @Action(AddTicketAction)
   add(ctx: StateContext<TicketsStateModel>, { payload }: AddTicketAction) {
-    const stateModel = ctx.getState();
-    ctx.patchState({ items: [...stateModel.items, payload] });
+    return this.ticketService.addTicket(payload).pipe(
+      tap((newTicket) => {
+        const stateModel = ctx.getState();
+        ctx.patchState({ items: [...stateModel.items, newTicket] });
+      })
+    );
   }
 
   @Action(RemoveTicketAction)
   remove(ctx: StateContext<TicketsStateModel>, { payload }: RemoveTicketAction) {
-    const stateModel = ctx.getState();
-    ctx.patchState({ items: stateModel.items.filter(item => item.id !== payload) });
+    return this.ticketService.deleteTicket(payload).pipe(
+      tap(() => {
+        const stateModel = ctx.getState();
+        ctx.patchState({ items: stateModel.items.filter(item => item.id !== payload) });
+      })
+    );
   }
 
   @Action(UpdateTicketStatusAction)
   updateStatus(ctx: StateContext<TicketsStateModel>, { payload }: UpdateTicketStatusAction) {
-   const stateModel = ctx.getState();
-   ctx.patchState({ items: stateModel.items.map(item => item.id === payload.id ? {...item, status: payload.newStatus} : item) })
+    return this.ticketService.updateTicketStatus(payload.id, payload.newStatus).pipe(
+      tap((updatedTicket) => {
+        const stateModel = ctx.getState();
+        ctx.patchState({
+          items: stateModel.items.map(item => item.id === payload.id ? updatedTicket : item)
+        });
+      })
+    );
   }
 
   @Action(UpdateTicketFilterAction)

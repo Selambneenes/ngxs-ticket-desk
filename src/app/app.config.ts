@@ -6,10 +6,13 @@ import { provideToastr } from 'ngx-toastr';
 import { routes } from './app.routes';
 import { provideStore } from '@ngxs/store';
 import { TicketsState } from './store/tickets.state';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { mockApiInterceptor } from './interceptors/mock-api-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideStore([TicketsState]),
+    provideRouter(routes),
     provideAnimations(),
     provideToastr({
       timeOut: 3000,
@@ -17,6 +20,6 @@ export const appConfig: ApplicationConfig = {
       preventDuplicates: true,
     }),
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    provideHttpClient(withInterceptors([mockApiInterceptor])),
   ]
 };
