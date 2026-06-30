@@ -1,0 +1,21 @@
+<!-- @for (username of usernames$ | async; track username) {
+<div class="bg-red-500">
+    <p>{{ username }}</p>
+</div>
+} -->
+
+<div class="flex flex-col gap-y-2">
+    @for (user of filteredUsers$ | async; track user.name) {
+    <div class="bg-green-500 flex flex-col border-t-[1px] border-[#a42323]">
+        <div>
+            {{ user.name }}
+        </div>
+        <div>
+            {{ user.age }}
+        </div>
+        <div>
+            {{ user.isActive }}
+        </div>
+    </div>
+    }
+</div>
